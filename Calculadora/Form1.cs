@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -120,7 +121,7 @@ namespace Calculadora
         }
         private void btnPlus_Click(object sender, EventArgs e)
         {
-            if (conta.Length != 0)
+            if (conta.Length != 0 && txtCurrent.Text != "0,")
             {
                 lastOp = "+";
                 txtCurrent.Clear();
@@ -137,7 +138,7 @@ namespace Calculadora
 
         private void btnDiv_Click(object sender, EventArgs e)
         {
-            if (conta.Length != 0)
+            if (conta.Length != 0 && txtCurrent.Text != "0,")
             {
                 lastOp = "/";
                 txtCurrent.Clear();
@@ -153,7 +154,7 @@ namespace Calculadora
 
         private void btnMult_Click(object sender, EventArgs e)
         {
-            if (conta.Length != 0)
+            if (conta.Length != 0 && txtCurrent.Text != "0,")
             {
                 lastOp = "*";
                 txtCurrent.Clear();
@@ -169,18 +170,39 @@ namespace Calculadora
 
         private void btnMinus_Click(object sender, EventArgs e)
         {
-            if (conta.Length != 0)
-            {
-                lastOp = "-";
-                txtCurrent.Clear();
-                lblTotal.Text = valAtual.ToString();
-                conta.Append(" - ");
-                valTotal = valTotal - valAtual;
-                Console.WriteLine("valor atual" + valAtual);
-                Console.WriteLine("valor total" + valTotal);
-                lblTotal.Text = valTotal.ToString();
-                lblHistory.Text = conta.ToString();
-
+            //TODO: Check this!
+            String history = lblHistory.Text;
+            Regex regex = new Regex(@"([0-9]?\s-\s)$");
+            Match match = regex.Match(history);
+            if (!match.Success){
+                if (conta.Length != 0 && txtCurrent.Text != "0,")
+                {
+                    lastOp = "-";
+                    Console.WriteLine("valor atual " + valAtual);
+                    Console.WriteLine("valor total " + valTotal);
+                    txtCurrent.Clear();
+                    Console.WriteLine("valor atual " + valAtual);
+                    Console.WriteLine("valor total " + valTotal);
+                
+                    bool result = double.TryParse(lblTotal.Text, out valTotal);
+                    if (valTotal == 0 && lblTotal.Text == "")
+                    {
+                        lblTotal.Text = valAtual.ToString();
+                        Console.WriteLine("valor atual " + valAtual);
+                        Console.WriteLine("valor total " + valTotal);
+                        conta.Append(" - ");
+                    } else
+                    {
+                        valTotal = valTotal - valAtual;
+                        lblTotal.Text = valTotal.ToString();
+                        Console.WriteLine("valor atual " + valAtual);
+                        Console.WriteLine("valor total " + valTotal);
+                        conta.Append(" - ");
+                    }
+                    lblHistory.Text = conta.ToString();
+                    Console.WriteLine("valor atual " + valAtual);
+                    Console.WriteLine("valor total " + valTotal);
+                }
             }
         }
 
@@ -205,7 +227,29 @@ namespace Calculadora
 
         private void btnEquals_Click(object sender, EventArgs e)
         {
+            switch (lastOp)
+            {
+                case "+":
+                    {
+                        valTotal = valAtual + valTotal;
+                        Console.WriteLine("valor atual" + valAtual);
+                        Console.WriteLine("valor total" + valTotal);
+                        lblTotal.Text = valTotal.ToString();
+                        lblHistory.Text = conta.ToString();
+                        txtCurrent.Clear();
+                        valAtual = 0;
+                        lastOp = "";
+                        break;
+                    }
+                case "-":
+                    break;
+                case "*":
+                    break;
+                case "/":
+                    break;
+            }
 
+            
         }
     }
 }
